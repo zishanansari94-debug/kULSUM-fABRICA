@@ -1503,7 +1503,7 @@ const QuickView = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative bg-[#F9F6F1] w-full max-w-4xl max-h-[92vh] overflow-y-auto md:overflow-hidden rounded-sm shadow-2xl flex flex-col md:flex-row"
+        className="relative bg-[#F9F6F1] w-full max-w-4xl max-h-[92vh] overflow-y-auto md:overflow-hidden rounded-sm shadow-2xl flex flex-col md:flex-row isolate"
       >
         <button 
           onClick={onClose}
@@ -1513,8 +1513,8 @@ const QuickView = ({
         </button>
 
         {/* Left: Image Section */}
-        <div className="w-full md:w-1/2 flex-shrink-0 bg-stone-100 group relative flex flex-col items-center justify-center">
-          <div className="w-full h-[400px] md:h-full relative overflow-hidden flex items-center justify-center">
+        <div className="w-full md:w-1/2 flex-shrink-0 bg-stone-100 group relative flex flex-col items-center justify-center sticky top-0 z-30 md:static md:shadow-none bg-stone-100">
+          <div className="w-full h-[280px] md:h-full relative overflow-hidden flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.img 
                 key={currentImage}
@@ -1533,13 +1533,13 @@ const QuickView = ({
               <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between z-10 pointer-events-none">
                 <button 
                   onClick={() => setActiveImageIndex(prev => (prev === 0 ? productImages.length - 1 : prev - 1))}
-                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm text-on-surface hover:bg-white transition-all pointer-events-auto"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm text-on-surface hover:bg-white transition-all pointer-events-auto"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button 
                   onClick={() => setActiveImageIndex(prev => (prev === productImages.length - 1 ? 0 : prev + 1))}
-                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm text-on-surface hover:bg-white transition-all pointer-events-auto"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm text-on-surface hover:bg-white transition-all pointer-events-auto"
                 >
                   <ChevronDown className="-rotate-90" size={16} />
                 </button>
@@ -1547,15 +1547,15 @@ const QuickView = ({
             )}
           </div>
 
-          {/* Thumbnail Gallery */}
+          {/* Thumbnail Gallery (Compact for mobile) */}
           {hasMultipleImages && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full border border-white/40 shadow-sm z-20">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-1.5 bg-white/40 backdrop-blur-md rounded-full border border-white/40 shadow-sm z-20">
               {productImages.map((img: string, idx: number) => (
                 <button 
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`w-12 h-16 rounded-sm overflow-hidden border-2 transition-all duration-300 ${
-                    activeImageIndex === idx ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-white/60 grayscale-[0.5] hover:grayscale-0'
+                  className={`w-8 h-10 md:w-12 md:h-16 rounded-sm overflow-hidden border transition-all duration-300 ${
+                    activeImageIndex === idx ? 'border-primary ring-1 ring-primary/20 scale-110' : 'border-white/60'
                   }`}
                 >
                   <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
@@ -1563,27 +1563,44 @@ const QuickView = ({
               ))}
             </div>
           )}
+
+          {/* Only shown on mobile: Sticky Name & Price */}
+          <div className="md:hidden w-full px-6 py-4 bg-[#F9F6F1] border-b border-outline-variant/30 shadow-sm">
+            <h2 className="text-xl font-display text-on-surface mb-0.5 leading-tight">
+              {product.name}
+            </h2>
+            <div className="flex justify-between items-center">
+              <p className="text-lg font-semibold text-primary/80 font-sans">
+                {product.price}
+              </p>
+              <span className="text-[8px] font-bold tracking-[0.2em] text-primary/60 uppercase">Premium Collection</span>
+            </div>
+            <p className="text-[11px] text-tertiary font-light leading-snug mt-1 opacity-70 line-clamp-1">
+              {product.description || "Soft, breathable premium malmal fabric designed for supreme comfort."}
+            </p>
+          </div>
         </div>
 
         {/* Right: Details Section */}
-        <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-[#F9F6F1]">
-          <div className="mb-4 md:mb-6">
+        <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col bg-[#F9F6F1]">
+          {/* Desktop Basic Info */}
+          <div className="hidden md:block mb-6">
             <span className="text-[10px] font-bold tracking-[0.3em] text-primary/60 uppercase mb-2 block">Premium Collection</span>
             <h2 className="text-2xl md:text-3xl font-display text-on-surface mb-2 leading-tight">
               {product.name}
             </h2>
-            <p className="text-xl font-semibold text-primary/80 mb-3 md:mb-4 font-sans">
+            <p className="text-xl font-semibold text-primary/80 mb-4 font-sans">
               {product.price}
             </p>
-            <p className="text-sm text-tertiary font-light leading-relaxed mb-3 md:mb-4 opacity-80">
+            <p className="text-sm text-tertiary font-light leading-relaxed mb-4 opacity-80">
               {product.description || "Soft, breathable premium malmal fabric designed for supreme comfort and effortless style."}
             </p>
           </div>
 
-          <div className="space-y-3 md:space-y-4">
+          <div className="space-y-4 md:space-y-6 flex-grow">
             {/* Dyeable Specification for Embroidery */}
             {isEmbroidery && (
-              <div className="flex items-center gap-2 py-2 px-3 bg-primary/5 border border-primary/10 rounded-sm">
+              <div className="flex items-center gap-2 py-2 px-3 bg-primary/5 border border-primary/10 rounded-sm w-fit">
                 <CheckCircle size={14} className="text-primary" />
                 <span className="text-[10px] font-bold tracking-widest uppercase text-primary">Dyeable Fabric</span>
               </div>
@@ -1591,11 +1608,11 @@ const QuickView = ({
 
             {/* Design Selection for Embroidery */}
             {isEmbroidery && product.designs && (
-              <div>
-                <label className="block text-[8px] font-bold tracking-[0.2em] text-on-surface/40 uppercase mb-2">
+              <div className="space-y-2">
+                <label className="block text-[8px] font-bold tracking-[0.2em] text-on-surface/40 uppercase">
                   Select Design
                 </label>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   {product.designs.map((design: any, idx: number) => (
                     <button 
                       key={design.name}
@@ -1613,17 +1630,17 @@ const QuickView = ({
               </div>
             )}
 
-            {/* Color Match Tool Integration (Find Your Perfect Shade) */}
+            {/* Color Match Tool Integration */}
             {!isEmbroidery && (
-              <div ref={colorMatchRef} className={autoFocusColorMatch ? "ring-2 ring-primary/20 rounded-sm p-3 -m-3 bg-primary/[0.02]" : ""}>
+              <div ref={colorMatchRef} className={`space-y-2 ${autoFocusColorMatch ? "ring-1 ring-primary/20 rounded-sm p-3 -m-3 bg-primary/[0.02]" : ""}`}>
                 <ColorMatchTool onSelect={(color) => setSelectedColor(color)} currentImages={colorImages} />
               </div>
             )}
 
             {/* Color Selection */}
             {!isEmbroidery && (
-              <div>
-                <label className="block text-[8px] font-bold tracking-[0.2em] text-on-surface/40 uppercase mb-2">
+              <div className="space-y-2">
+                <label className="block text-[8px] font-bold tracking-[0.2em] text-on-surface/40 uppercase">
                   Select Colour
                 </label>
                 <ColorSwatches 
@@ -1641,33 +1658,33 @@ const QuickView = ({
                   Colour
                 </label>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border border-primary/20 bg-white shadow-sm flex items-center justify-center">
-                    <Check size={16} className="text-primary" />
+                  <div className="w-8 h-8 rounded-full border border-primary/20 bg-white shadow-sm flex items-center justify-center">
+                    <Check size={14} className="text-primary" />
                   </div>
                   <span className="text-[10px] font-bold tracking-widest uppercase text-on-surface">White</span>
                 </div>
               </div>
             )}
+          </div>
 
-            {/* Add to Cart */}
-            <div className="space-y-4 pt-2 md:pt-4">
-              <button 
-                onClick={() => {
-                  const finalProduct = isEmbroidery ? { ...product, name: `${product.name} - ${currentDesign.name}` } : product;
-                  onAddToCart(finalProduct, selectedColor, currentImage);
-                  onClose();
-                }}
-                className="w-full bg-primary text-on-primary py-4 px-6 text-xs font-bold tracking-[0.3em] uppercase hover:bg-primary-container hover:text-on-primary-container transition-all shadow-lg active:scale-[0.98]"
-              >
-                Add to Cart
-              </button>
-              
-              <button className="w-full text-center py-1 group">
-                <span className="text-[10px] font-bold tracking-[0.2em] text-on-surface/40 uppercase group-hover:text-primary transition-colors flex items-center justify-center gap-2">
-                  View Full Details <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-                </span>
-              </button>
-            </div>
+          {/* Sticky Bottom Add to Cart (More compact on mobile) */}
+          <div className="sticky bottom-0 bg-[#F9F6F1] z-30 -ms-6 -me-6 px-6 pt-4 pb-6 mt-8 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] md:static md:m-0 md:p-0 md:shadow-none md:mt-10">
+            <button 
+              onClick={() => {
+                const finalProduct = isEmbroidery ? { ...product, name: `${product.name} - ${currentDesign.name}` } : product;
+                onAddToCart(finalProduct, selectedColor, currentImage);
+                onClose();
+              }}
+              className="w-full bg-primary text-on-primary py-3 md:py-4 px-6 text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase hover:bg-primary-container hover:text-on-primary-container transition-all shadow-lg active:scale-[0.98]"
+            >
+              Add to Cart
+            </button>
+            
+            <button className="w-full text-center mt-4 group">
+              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.2em] text-on-surface/40 uppercase group-hover:text-primary transition-colors flex items-center justify-center gap-2">
+                View Full Details <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+              </span>
+            </button>
           </div>
         </div>
       </motion.div>
